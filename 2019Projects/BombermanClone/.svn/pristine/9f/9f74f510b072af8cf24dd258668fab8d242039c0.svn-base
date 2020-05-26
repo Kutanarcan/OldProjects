@@ -1,0 +1,14 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName ="Game Data",menuName ="ScriptableObjects/GameData")]
+public class InitialGameData : GameData
+{
+    public int StartingBombRange;
+    public int StartingLife;
+    public int StartingBombCount;
+    public int StartingScore;
+    public float StartingTime;
+    public float StartingSpeed;
+}

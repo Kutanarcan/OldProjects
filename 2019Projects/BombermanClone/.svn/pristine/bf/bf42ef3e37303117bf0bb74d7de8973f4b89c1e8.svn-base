@@ -1,0 +1,23 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class PortalTrigger : MonoBehaviour
+{
+    [SerializeField]
+    private SceneData sceneData;
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag(TagContainer.PLAYER_TAG))
+        {
+            if (SceneManager.GetActiveScene().buildIndex==3)
+            {
+                Debug.Log("Game Ended");
+                CustomEventSystem.GameEndedAction();
+                return;
+            }
+            SceneChanger.LoadTheScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
+    }
+}

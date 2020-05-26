@@ -1,0 +1,44 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Creep : MonoBehaviour
+{
+    [SerializeField]
+    private LayerMask tile;
+    void Update()
+    {
+        //Just for Test purposes
+        RaycastHit2D hitInfoUp = Physics2D.Raycast(transform.position, transform.up, 1f, tile);
+        RaycastHit2D hitInfoUp2 = Physics2D.Raycast(transform.position, -transform.up, 1f, tile);
+        RaycastHit2D hitInfoUp3 = Physics2D.Raycast(transform.position, transform.right, 1f, tile);
+        RaycastHit2D hitInfoUp4 = Physics2D.Raycast(transform.position, -transform.right, 1f, tile);
+        Debug.DrawRay(transform.position, transform.up, Color.red, 1f);
+        Debug.DrawRay(transform.position, -transform.up, Color.yellow, 1f);
+        Debug.DrawRay(transform.position, transform.right, Color.blue, 1f);
+        Debug.DrawRay(transform.position, -transform.right, Color.green, 1f);
+        // Debug.DrawLine(transform.position, transform.position+transform.up,Color.red);
+        //   Debug.DrawLine(transform.position, (transform.position-transform.up),Color.yellow);
+        //  Debug.DrawLine(transform.position, transform.position+transform.right,Color.blue);
+        if (hitInfoUp.collider != null )
+        {
+            Debug.Log(hitInfoUp.transform.name);            
+        }
+
+        if (hitInfoUp2.collider != null)
+        {
+            Debug.Log(hitInfoUp2.transform.name);
+        }
+
+        if (hitInfoUp3.collider != null)
+        {
+            Debug.Log(hitInfoUp3.transform.name);
+        }
+
+        if (hitInfoUp4.collider != null)
+        {
+            Debug.Log(hitInfoUp4.transform.name);
+        }     
+        
+    }
+}

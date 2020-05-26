@@ -1,0 +1,34 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public static class CustomEventSystem
+{
+    public static event System.Action<Tilemap> LevelChanged;
+    public static event System.Action<PowerUp> PickedPowerUp;
+    public static event System.Action PlayerDead;
+    public static event System.Action GameEnded;
+    public static event System.Action UpdateGameInfo;
+    
+    public static void LevelChangedAction(Tilemap gameplayTilemap)
+    {
+        LevelChanged?.Invoke(gameplayTilemap);
+    }
+   public static void PickedPowerUpAction(PowerUp powerup)
+    {
+        PickedPowerUp?.Invoke(powerup);
+    }
+    public static void PlayerDeadAction()
+    {
+        PlayerDead?.Invoke();
+    }
+    public static void GameEndedAction()
+    {
+        GameEnded?.Invoke();
+    }
+    public static void UpdateGameInfoAction()
+    {
+        UpdateGameInfo?.Invoke();
+    }
+}

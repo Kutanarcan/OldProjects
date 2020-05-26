@@ -1,0 +1,11 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName ="New Power up",menuName ="ScriptableObjects/PowerUp")]
+public class PowerUp : ScriptableObject
+{
+    public string PowerName;
+    public Sprite Icon;
+    public BaseActivator Activator;
+}

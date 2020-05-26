@@ -1,0 +1,61 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyMovement : MonoBehaviour
+{
+    [SerializeField]
+    private float moveSpeed;
+    private float directionTimer;
+    private Enemy enemy;
+    private Vector3 direction;
+    private WaitForSeconds directionDuration;
+    private PatrolState patrolState;
+    private bool isPathEnd;
+    private void Awake()
+    {
+        enemy = GetComponent<Enemy>();
+        patrolState = enemy.EnemyStates.GetPatrolState(transform, enemy.Obstacle);
+        patrolState.EnterState();     
+    }
+    public void SetDirection(Vector3 direction)
+    {
+        directionTimer = Random.Range(2, 5);
+        directionDuration = new WaitForSeconds(directionTimer);
+        isPathEnd = false;
+        this.direction = direction;
+        StartCoroutine(FindNewDirectionCoroutine());
+    }
+    private void FixedUpdate()
+    {
+        transform.Translate(direction * Time.fixedDeltaTime * moveSpeed);
+        PathEnded();
+    }
+    IEnumerator FindNewDirectionCoroutine()
+    {      
+        yield return directionDuration;
+        patrolState.ExitState();
+        yield return null;
+        patrolState.EnterState();
+    }
+  
+    private void PathEnded()
+    {
+        if (!isPathEnd)
+        {
+            RaycastHit2D pathInfo = Physics2D.Raycast(transform.position, direction, 0.3f, enemy.Obstacle);
+            if (pathInfo.collider != null)
+            {
+                StartCoroutine(WaitDirectionToChangeCoroutine());
+                IEnumerator WaitDirectionToChangeCoroutine()
+                {
+                    Debug.DrawRay(transform.position, direction, Color.yellow, 0.3f);
+                    isPathEnd = true;
+                    direction = -direction;
+                    yield return null;
+                    isPathEnd = false;
+                }
+            }
+        }
+    }
+}

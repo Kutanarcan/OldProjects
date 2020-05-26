@@ -1,0 +1,63 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyMovement : MonoBehaviour
+{
+    [SerializeField]
+    private float moveSpeed;
+    private float directionTimer;
+    private Enemy enemy;
+    private Vector3 direction;
+    private WaitForSeconds directionDuration;
+    private PatrolState patrolState;
+    private bool isPathEnd;
+    private void Awake()
+    {
+        enemy = GetComponent<Enemy>();
+        patrolState = enemy.enemyStates.GetPatrolState(transform, enemy.obstacle);
+        patrolState.EnterState();
+        directionTimer = Random.Range(3, 7);
+        directionDuration = new WaitForSeconds(directionTimer);
+    }
+    public void SetDirection(Vector3 direction)
+    {
+        isPathEnd = false;
+        this.direction = direction;
+        Debug.Log($"My Direction: {direction}");
+        StartCoroutine(FindNewDirectionCoroutine());
+    }
+    private void FixedUpdate()
+    {
+        transform.Translate(direction * Time.fixedDeltaTime);
+        PathEnded();
+    }
+    IEnumerator FindNewDirectionCoroutine()
+    {
+        yield return directionDuration;
+        patrolState.ExitState();
+        yield return null;
+        patrolState.EnterState();
+    }
+    private void PathEnded()
+    {
+        //TODO: Has one bug solve it!
+        if (!isPathEnd)
+        {
+            RaycastHit2D pathInfo = Physics2D.Raycast(transform.position, direction, 0.3f, enemy.obstacle);
+            if (pathInfo.collider != null)
+            {             
+                StartCoroutine(WaitDirectionToChangeCoroutine());
+                IEnumerator WaitDirectionToChangeCoroutine()
+                {
+                    Debug.Log("Changing Direction");
+                    Debug.DrawRay(transform.position, direction, Color.yellow, 0.3f);
+                    isPathEnd = true;
+                    direction = -direction;
+                    yield return null;
+                    isPathEnd = false;
+                }
+            }
+        }
+    }
+}

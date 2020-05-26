@@ -1,0 +1,53 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public abstract class Enemy : MonoBehaviour, IDamagable, IGiveScore
+{
+    public LayerMask Obstacle => obstacle;
+    public EnemyStates EnemyStates => enemyStates;
+    [SerializeField]
+    private int deadScore;
+    [SerializeField]
+    private LayerMask obstacle;
+    [SerializeField]
+    private EnemyStates enemyStates;
+    private GameManager gameManager;
+    private void Start()
+    {        
+        gameManager = GameManager.Instance;
+        gameManager.ComboCounter = 0;
+    }
+    public void ApplyDamage()
+    {
+        StartCoroutine(ComboKillCoroutine());
+    }
+    IEnumerator ComboKillCoroutine()
+    {
+        gameManager.ComboCounter++;
+        GiveScore(deadScore * gameManager.ComboCounter);
+        yield return null;
+        Destroy(gameObject);
+    }
+
+    public void GiveScore(int amount)
+    {
+        gameManager.Score += amount;
+        CustomEventSystem.UpdateGameInfoAction();
+    }
+    private void OnDestroy()
+    {
+        gameManager.DecreaseEnemyCount();
+        Debug.Log(gameManager.EnemyCount);
+        gameManager.ComboCounter--;
+    }
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        IDamagable component = other.gameObject.GetComponent<IDamagable>();
+        if (component != null)
+        {
+            Destroy(other.gameObject);
+            component.ApplyDamage();
+        }
+    }
+}

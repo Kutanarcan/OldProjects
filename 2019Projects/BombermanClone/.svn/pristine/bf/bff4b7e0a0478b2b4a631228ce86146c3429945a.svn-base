@@ -1,0 +1,126 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
+
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager Instance { get; private set; }
+    public GameObject Level { get; private set; }
+    public GameObject Player => playerPrefab;
+    public float StartTime { get => startTime; set => startTime = value; }
+    public int SceneIndex { get; set; } = 1;
+    public int Score { get; set; }
+    public int TimerIndex { get; set; }
+
+    [SerializeField]
+    private GameObject level;
+    private Tilemap gameplayTilemap;
+    [SerializeField]
+    private GameObject playerPrefab;
+    [SerializeField]
+    private float deadTime;
+    private WaitForSeconds deadDuration;
+    private float startTime;
+    public bool IsGameStarted { get; set; }
+    [Header("Data")]
+    [SerializeField]
+    private InitialGameData InitialGameData;
+    [SerializeField]
+    private BombData bombData;
+    [SerializeField]
+    private PlayerMovementData playerMovementData;
+    [SerializeField]
+    private PlayerOrigin playerOrigin;
+    [SerializeField]
+    private SceneData sceneData;
+    private float countTimer;
+
+    private void Awake()
+    {
+        SetInitialGameData();
+        InitializeSingleton();
+        CustomEventSystem.LevelChanged += SetGameplayElements;
+        CustomEventSystem.OnPlayerDead += PlayerDead;
+        CustomEventSystem.OnGameEnd += GameEnded;
+        deadDuration = new WaitForSeconds(deadTime);
+    }
+
+    private void GameEnded()
+    {
+
+    }
+
+    private void InitializeSingleton()
+    {
+        if (Instance != null)
+            Destroy(gameObject);
+        else
+        {
+            Instance = this;
+            DontDestroyOnLoad(transform.gameObject);
+        }
+    }
+    private void SetGameplayElements(Tilemap tilemap)
+    {
+        gameplayTilemap = tilemap;
+        Instantiate(Player, playerOrigin.OriginPoint, Quaternion.identity);
+        startTime = sceneData.levelInformations[TimerIndex].LevelTime;
+    }
+    private void PlayerDead()
+    {
+        if (playerOrigin.PlayerLife > 0)
+        {
+            StartCoroutine(ReactToDeadCoroutine());
+            IEnumerator ReactToDeadCoroutine()
+            {
+                startTime = InitialGameData.StartingTime;
+                playerOrigin.PlayerLife--;
+                yield return deadDuration;
+                CustomEventSystem.UpdateGameInfoAction();
+                CustomEventSystem.LevelChangedAction(gameplayTilemap);
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+        }
+    }
+    private void SetInitialGameData()
+    {
+        bombData.bombCount = InitialGameData.StartingBombCount;
+        bombData.range = InitialGameData.StartingBombRange;
+        playerMovementData.MovementSpeed = InitialGameData.StartingSpeed;
+        playerOrigin.PlayerLife = InitialGameData.StartingLife;
+        Score = InitialGameData.StartingScore;
+        startTime = InitialGameData.StartingTime;
+    }
+    public Tilemap GetGameplayTilemap()
+    {
+        return gameplayTilemap;
+    }
+    private void Update()
+    {
+        CountTime();
+    }
+    public float CountTime()
+    {
+        if (IsGameStarted &&countTimer>=0)
+        {
+            countTimer = startTime - Time.time;
+            UIManager.Instance.UpdateGameTime(countTimer);
+        }
+        return countTimer;
+    }
+    private void OnDestroy()
+    {
+        CustomEventSystem.LevelChanged -= SetGameplayElements;
+        CustomEventSystem.OnPlayerDead -= PlayerDead;
+        CustomEventSystem.OnGameEnd -= GameEnded;
+        playerOrigin.PlayerLife = InitialGameData.StartingLife;
+        CustomEventSystem.UpdateGameInfoAction();
+    }
+    public static void LoadTheScene(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+}

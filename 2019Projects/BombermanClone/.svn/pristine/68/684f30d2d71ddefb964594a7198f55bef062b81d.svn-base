@@ -1,0 +1,202 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
+
+public class UIManager : MonoBehaviour
+{
+    public static UIManager Instance { get; private set; }
+    [SerializeField]
+    private GameObject mainMenuPanel;
+    [SerializeField]
+    private GameObject continuePanel;
+    [SerializeField]
+    private GameObject gameplayPanel;
+    [SerializeField]
+    private TMP_InputField passwordField;
+    [SerializeField]
+    private SceneData sceneData;
+    [SerializeField]
+    private TextMeshProUGUI wrongPass;
+    [Header("Gameplay Components")]
+    [SerializeField]
+    private TextMeshProUGUI lifeText;
+    [SerializeField]
+    private TextMeshProUGUI scoreText;
+    [SerializeField]
+    private TextMeshProUGUI timeText;
+    [SerializeField]
+    private GameObject powerUpPanel;
+    [SerializeField]
+    private PlayerOrigin playerOrigin;
+    [Space]
+    [SerializeField]
+    private GameObject playerDeadPanel;
+    [SerializeField]
+    private TextMeshProUGUI deadText;
+    [SerializeField]
+    private float deadTime;
+    [SerializeField]
+    private float gameStartTime;
+    [Header("End Game Components")]
+    [SerializeField]
+    private GameObject winPanel;
+    [SerializeField]
+    private GameObject losePanel;
+    [SerializeField]
+    private TextMeshProUGUI winScore;
+    [SerializeField]
+    private TextMeshProUGUI loseScore;
+    [SerializeField]
+    private TextMeshProUGUI losePassword;
+    private WaitForSeconds deadDuration;
+    private LevelInformation[] levelInformations;
+    private float countDownTimer;
+    private GameManager gameManager;
+    private Animator deadAnimator;
+    private WaitForSeconds gameStartTimer;
+    
+
+
+    private void Awake()
+    {
+        gameStartTimer = new WaitForSeconds(gameStartTime);
+        levelInformations = sceneData.levelInformations;
+        InitializeSingleton();
+        CustomEventSystem.OnPlayerDead += PlayerDead;
+        CustomEventSystem.OnGameEnd += GameEnded;
+        CustomEventSystem.OnUpdateGameInfoChanged += UpdateGameplayPanel;
+        deadAnimator = playerDeadPanel.GetComponent<Animator>();
+        deadDuration = new WaitForSeconds(deadTime);
+    }
+    private void GameEnded()
+    {
+        winPanel.SetActive(true);
+        gameplayPanel.SetActive(false);
+        playerDeadPanel.SetActive(false);
+        winScore.text = $"YOUR SCORE:  {gameManager.Score.ToString()}";
+    }
+
+    private void PlayerDead()
+    {
+        if (playerOrigin.PlayerLife > 0)
+        {
+            int index = SceneManager.GetActiveScene().buildIndex - 1;
+            Debug.Log(levelInformations[index].GetGameplayTilemap());
+            StartCoroutine(ReactToDeadCoroutine());
+        }
+        else
+        {
+            int index = SceneManager.GetActiveScene().buildIndex - 1;
+            losePanel.SetActive(true);
+            loseScore.text = $"YOUR SCORE:  { gameManager.Score.ToString()}";
+            gameplayPanel.SetActive(false);
+            playerDeadPanel.SetActive(false);
+            losePassword.text = $"Level's Password: { levelInformations[index].levelPassword}";
+
+            Time.timeScale = 1f;
+
+        }
+        IEnumerator ReactToDeadCoroutine()
+        {
+            gameplayPanel.SetActive(false);
+            deadText.enabled = true;
+            deadAnimator.SetTrigger("dead");
+            playerDeadPanel.SetActive(true);
+            yield return deadDuration;
+            gameplayPanel.SetActive(true);
+            deadText.enabled = false;
+            deadAnimator.SetTrigger("alive");
+        }
+    }
+    private void OnDestroy()
+    {
+        CustomEventSystem.OnPlayerDead -= PlayerDead;
+        CustomEventSystem.OnGameEnd -= GameEnded;
+        CustomEventSystem.OnUpdateGameInfoChanged -= UpdateGameplayPanel;
+    }
+
+    private void Start()
+    {
+        gameManager = GameManager.Instance;
+        UpdateGameplayPanel();
+    }
+    private void InitializeSingleton()
+    {
+        if (Instance != null)
+            Destroy(gameObject);
+        else
+        {
+            Instance = this;
+            DontDestroyOnLoad(transform.gameObject);
+        }
+    }
+
+    public void StartGame()
+    {
+        StartCoroutine(StartGameCoroutine());
+    }
+    IEnumerator StartGameCoroutine()
+    {
+        yield return gameStartTimer;
+        GameManager.LoadTheScene(levelInformations[0].levelName);
+        yield return null;
+        mainMenuPanel.SetActive(false);
+        gameplayPanel.SetActive(true);
+    }
+    public void ContinueGame()
+    {
+        continuePanel.SetActive(true);
+        mainMenuPanel.SetActive(false);
+    }
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+    public void BackToMainMenu()
+    {
+        continuePanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+    }
+    public void EnterTheGame()
+    {
+        for (int i = 0; i < levelInformations.Length; i++)
+        {
+            if (passwordField.text == levelInformations[i].levelPassword)
+            {
+                StartCoroutine(EnterTheGameCoroutine(i));
+                return;
+            }
+            else
+            {
+                wrongPass.gameObject.SetActive(true);
+            }          
+        }
+        IEnumerator EnterTheGameCoroutine(int index)
+        {
+            yield return gameStartTimer;
+            GameManager.LoadTheScene(levelInformations[index].levelName);
+            continuePanel.SetActive(false);
+            gameplayPanel.SetActive(true);
+            wrongPass.gameObject.SetActive(false);
+        }
+    }
+    private void UpdateGameplayPanel()
+    {
+        lifeText.text = $"LIFE: { playerOrigin.PlayerLife.ToString()}";
+        scoreText.text = $"SCORE:  { gameManager.Score.ToString()}";
+    }
+    public void UpdateGameTime(float countTimer)
+    {
+        timeText.text = $"TIME:  {countTimer.ToString("f0")}";
+    }
+    public void GoToTheMainMenu()
+    {
+        GameManager.LoadTheScene("MainMenu");
+        mainMenuPanel.SetActive(true);
+        winPanel.SetActive(false);
+        losePanel.SetActive(false);
+    }
+}

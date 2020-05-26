@@ -1,0 +1,77 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Enemy State", menuName = "ScriptableObjects/Enemy/PatrolState")]
+public class PatrolState : State
+{
+    private Transform enemyTransform;
+    private LayerMask obstacle;
+    private List<Vector3> hitTransforms;
+    private List<Vector3> directions;
+    private float count=2f;
+    public PatrolState(Transform transform,LayerMask mask)
+    {
+        enemyTransform = transform;
+        obstacle = mask;
+
+        hitTransforms = new List<Vector3>();
+        directions = new List<Vector3>();
+        hitTransforms.Add(enemyTransform.up);//UP
+        hitTransforms.Add(-enemyTransform.up);//DOWN
+        hitTransforms.Add(enemyTransform.right);//RIGHT
+        hitTransforms.Add(-enemyTransform.right);//LEFT
+    }
+    public override void EnterState()
+    {
+        FindDirection();
+        int rand = Random.Range(0,directions.Count);
+        enemyTransform.Translate(directions[rand]*Time.deltaTime);
+    }
+    public override void ExitState()
+    {
+
+    }
+    private void FindDirection()
+    {
+        //Testing now. It will suit the name of the function.
+        for (int i = 0; i < hitTransforms.Count; i++)
+        {
+            RaycastHit2D hitInfo = Physics2D.Raycast(enemyTransform.position, hitTransforms[i], 1f, obstacle);
+            Debug.DrawRay(enemyTransform.position, hitTransforms[i], Color.red, 1f);
+            if (hitInfo.collider==null)            
+                directions.Add(hitTransforms[i]);            
+            else
+               Debug.Log(hitInfo.transform.name);
+        }
+
+        /* RaycastHit2D hitInfoUp = Physics2D.Raycast(enemyTransform.position, enemyTransform.up, 1f, obstacle);
+         RaycastHit2D hitInfoUp2 = Physics2D.Raycast(enemyTransform.position, -enemyTransform.up, 1f, obstacle);
+         RaycastHit2D hitInfoUp3 = Physics2D.Raycast(enemyTransform.position, enemyTransform.right, 1f, obstacle);
+         RaycastHit2D hitInfoUp4 = Physics2D.Raycast(enemyTransform.position, -enemyTransform.right, 1f, obstacle);
+         Debug.DrawRay(enemyTransform.position, enemyTransform.up, Color.red, 1f);
+         Debug.DrawRay(enemyTransform.position, -enemyTransform.up, Color.yellow, 1f);
+         Debug.DrawRay(enemyTransform.position, enemyTransform.right, Color.blue, 1f);
+         Debug.DrawRay(enemyTransform.position, -enemyTransform.right, Color.green, 1f);
+
+         if (hitInfoUp.collider != null)
+         {
+             Debug.Log(hitInfoUp.transform.name);
+         }
+
+         if (hitInfoUp2.collider != null)
+         {
+             Debug.Log(hitInfoUp2.transform.name);
+         }
+
+         if (hitInfoUp3.collider != null)
+         {
+             Debug.Log(hitInfoUp3.transform.name);
+         }
+
+         if (hitInfoUp4.collider != null)
+         {
+             Debug.Log(hitInfoUp4.transform.name);
+         }*/
+    }
+}

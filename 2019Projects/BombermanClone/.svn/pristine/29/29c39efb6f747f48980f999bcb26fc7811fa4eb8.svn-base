@@ -1,0 +1,31 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public abstract class Enemy : MonoBehaviour, IDamagable, IGiveScore
+{
+    public LayerMask Obstacle => obstacle;
+    public EnemyStates EnemyStates => enemyStates;
+    [SerializeField]
+    private int deadScore;
+    [SerializeField]
+    private LayerMask obstacle;
+    [SerializeField]
+    private EnemyStates enemyStates;
+    private GameManager gameManager;
+    private void Start()
+    {
+        gameManager = GameManager.Instance;
+    }
+    public void ApplyDamage()
+    {
+        Destroy(gameObject);
+        GiveScore(deadScore);
+    }
+    public void GiveScore(int amount)
+    {
+        gameManager.Score += amount;
+        CustomEventSystem.UpdateGameInfoAction();
+    }
+ 
+}

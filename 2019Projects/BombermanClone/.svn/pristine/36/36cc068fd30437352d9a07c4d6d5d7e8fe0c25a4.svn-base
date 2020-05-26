@@ -1,0 +1,16 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Level", menuName = "ScriptableObjects/Data/Scene")]
+public class SceneData : ScriptableObject
+{
+    public LevelInformation[] levelInformations;
+}
+[System.Serializable]
+public struct LevelInformation
+{
+    public string LevelName;
+    public string LevelPassword;
+    public float LevelTime;
+}

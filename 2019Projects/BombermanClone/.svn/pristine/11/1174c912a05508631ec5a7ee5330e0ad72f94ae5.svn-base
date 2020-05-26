@@ -1,0 +1,10 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Data", menuName = "ScriptableObjects/Data/PlayerMovement")]
+public class PlayerMovementData : GameData
+{
+    public float MovementSpeed;
+    public float HorizontalAxis, VerticalAxis;
+}

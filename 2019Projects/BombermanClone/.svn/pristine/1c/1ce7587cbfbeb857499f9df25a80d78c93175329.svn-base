@@ -1,0 +1,43 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Bomb : MonoBehaviour
+{
+    [SerializeField]
+    private BombData initialbombData;
+    public BombData bombData { get; set; }
+    private WaitForSeconds countDown;
+    private MapDestroyer mapDestroyer;
+    [SerializeField]
+    private Collider2D collider;
+
+    private void Awake()
+    {
+        bombData = new BombData();
+        bombData.CountDown = initialbombData.CountDown;
+        bombData.Range = initialbombData.Range;
+        bombData.BombCount = initialbombData.BombCount;
+        countDown = new WaitForSeconds(bombData.CountDown);
+        StartCoroutine(Explosion());
+    }
+    private void Start()
+    {
+        mapDestroyer = MapDestroyer.Instance;
+    }
+    IEnumerator Explosion()
+    {
+        initialbombData.BombCount--;
+        yield return countDown;
+        initialbombData.BombCount++;
+        Destroy(gameObject);
+        mapDestroyer.Explode(transform.position, bombData.Range);
+    }
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag(TagContainer.PLAYER_TAG))
+        {
+            collider.gameObject.SetActive(true);
+        }
+    }
+}

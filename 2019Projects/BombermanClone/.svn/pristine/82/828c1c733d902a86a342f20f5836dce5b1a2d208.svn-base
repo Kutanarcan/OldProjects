@@ -1,0 +1,44 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class PortalTrigger : MonoBehaviour
+{
+    [SerializeField]
+    private SceneData sceneData;
+    private bool canChangeScene;
+    private void Awake()
+    {
+        CustomEventSystem.OnWhenAllEnemiesDied += AllEnemiesDied;
+    }
+    private void OnDisable()
+    {
+        CustomEventSystem.OnWhenAllEnemiesDied -= AllEnemiesDied;
+    }
+
+    private void AllEnemiesDied()
+    {
+        canChangeScene = true;
+    }
+
+    private const string LAST_LEVEL = "Level3";
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag(TagContainer.PLAYER_TAG))
+        {
+            if (canChangeScene)
+            {
+                if (SceneManager.GetActiveScene().name == LAST_LEVEL)
+                {
+                    Debug.Log("Game Ended");
+                    CustomEventSystem.GameEndedAction();
+                    GameManager.Instance.TimerIndex = 0;
+                    return;
+                }
+                GameManager.Instance.TimerIndex++;
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+            }           
+        }
+    }
+}

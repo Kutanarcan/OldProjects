@@ -1,0 +1,90 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public class MapDestroyer : MonoBehaviour
+{
+    public static MapDestroyer Instance { get; private set; }
+    private GameManager gameManager;
+    [SerializeField]
+    private Tilemap gameplayTilemap;
+    [SerializeField]
+    private Tile solidBlock;
+    [SerializeField]
+    private Tile explodeBlock;
+    [SerializeField]
+    private GameObject explosionPrefab;
+    [SerializeField]
+    private GameObject blockDestroyEffect;
+    [SerializeField]
+    private GameObject explosionSound;
+    [SerializeField]
+    private GameObject crackSound;
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        CustomEventSystem.LevelChangedAction(gameplayTilemap);
+        CustomEventSystem.OnDestroyGamePrefab += DestroyPrefab;
+    }
+    private void DestroyPrefab(GameObject prefab)
+    {
+        Destroy(prefab.gameObject);
+    }
+    void Start()
+    {
+        gameManager = GameManager.Instance;
+        gameManager.IsGameStarted = true;
+        gameManager.StartTime += Time.time;
+    }
+    public void Explode(Vector2 bombPosition, int range)
+    {
+        Vector3Int originCell = gameplayTilemap.WorldToCell(bombPosition);
+        ExplodeCell(originCell);
+        for (int i = -1; i <= 1; i += 2)
+        {
+            //Explosion x Axis
+            if (ExplodeCell(originCell + new Vector3Int(i, 0, 0)))
+            {
+                for (int j = 2; j < range; j++)
+                    ExplodeCell(originCell + new Vector3Int(i * j, 0, 0));
+            }
+            //Explosion Y Axis
+            if (ExplodeCell(originCell + new Vector3Int(0, i, 0)))
+            {
+                for (int j = 2; j < range; j++)
+                    ExplodeCell(originCell + new Vector3Int(0, i * j, 0));
+            }
+        }
+    }
+    private bool ExplodeCell(Vector3Int cell)
+    {
+        Tile tile = gameplayTilemap.GetTile<Tile>(cell);
+
+        if (tile == solidBlock)
+        {
+            return false;
+        }
+
+        if (tile == explodeBlock)
+        {
+            gameplayTilemap.SetTile(cell, null);
+            ExplosionEffect(blockDestroyEffect);
+            SoundManager.PlaySound(crackSound, 3f);
+            return false;
+        }
+        GameObject tmpExp = Instantiate(explosionSound);
+        Destroy(tmpExp,2f);
+        ExplosionEffect(explosionPrefab);
+        return true;
+        void ExplosionEffect(GameObject prefab)
+        {
+            Vector3 pos = gameplayTilemap.GetCellCenterWorld(cell);
+            GameObject tmp = Instantiate(prefab, pos, Quaternion.identity);
+            Destroy(tmp, 0.75f);
+        }
+    }
+}

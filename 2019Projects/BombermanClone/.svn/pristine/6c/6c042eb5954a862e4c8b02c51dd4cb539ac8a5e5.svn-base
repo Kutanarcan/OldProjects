@@ -1,0 +1,43 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public static class CustomEventSystem
+{
+    public static event System.Action<Tilemap> OnLevelChanged;
+    public static event System.Action<PowerUp> OnPickedPowerUp;
+    public static event System.Action OnPlayerDead;
+    public static event System.Action OnGameEnd;
+    public static event System.Action OnUpdateGameInfoChanged;
+    public static event System.Action<GameObject> OnDestroyGamePrefab;
+    public static event System.Action OnWhenAllEnemiesDied;
+    public static void LevelChangedAction(Tilemap gameplayTilemap)
+    {
+        OnLevelChanged?.Invoke(gameplayTilemap);
+    }
+   public static void PickedPowerUpAction(PowerUp powerup)
+    {
+        OnPickedPowerUp?.Invoke(powerup);
+    }
+    public static void PlayerDeadAction()
+    {
+        OnPlayerDead?.Invoke();
+    }
+    public static void GameEndedAction()
+    {
+        OnGameEnd?.Invoke();
+    }
+    public static void UpdateGameInfoAction()
+    {
+        OnUpdateGameInfoChanged?.Invoke();
+    }
+    public static void DestroyGamePrefabAction(GameObject prefab)
+    {
+        OnDestroyGamePrefab?.Invoke(prefab);
+    }
+    public static void WhenAllEnemiesDiedAction()
+    {
+        OnWhenAllEnemiesDied?.Invoke();
+    }
+}

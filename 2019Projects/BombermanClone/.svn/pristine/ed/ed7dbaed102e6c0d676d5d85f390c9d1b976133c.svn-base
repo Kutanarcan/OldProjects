@@ -1,0 +1,15 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Enemy State", menuName = "ScriptableObjects/Enemy/EnemyStates")]
+public class EnemyStates : ScriptableObject
+{
+    private PatrolState patrolState;
+    public PatrolState GetPatrolState(Transform transform,LayerMask mask)
+    {
+        patrolState = new PatrolState(transform,mask);
+        return patrolState;
+    }
+
+}

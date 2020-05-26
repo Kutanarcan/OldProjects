@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 617e9b2265992da49a7e99e38615ba90, type: 3}
+  m_Name: RangeIncrease
+  m_EditorClassIdentifier: 
+  PowerName: RangedIncreaser
+  Icon: {fileID: 21300000, guid: 5000d194ecfc6d845a914c52bb3819f6, type: 3}
+  Activator: {fileID: 3752324401346041542, guid: 0a4e90bf950b846488bc1b0671fa9b7b,
+    type: 3}
+  pickupSound: {fileID: 3584166332312640610, guid: d6b47f3c51afa014e92b0a6d18f0e6ce,
+    type: 3}

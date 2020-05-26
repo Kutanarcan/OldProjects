@@ -1,0 +1,29 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+[CreateAssetMenu(fileName = "New Level", menuName = "ScriptableObjects/Data/Scene")]
+public class SceneData : ScriptableObject
+{
+    public LevelInformation[] levelInformations;
+
+}
+[System.Serializable]
+public struct LevelInformation
+{
+    public string LevelName;
+    public string LevelPassword;
+    public float LevelTime;
+    public GameObject LevelPrefab;
+    private Tilemap GameplayTilemap;
+    public Tilemap GetGameplayTilemap()
+    {
+        if (LevelPrefab==null)
+        {
+            return null;
+        }
+        GameplayTilemap = LevelPrefab.transform.GetChild(1).GetComponent<Tilemap>();
+        return GameplayTilemap;
+    }
+}

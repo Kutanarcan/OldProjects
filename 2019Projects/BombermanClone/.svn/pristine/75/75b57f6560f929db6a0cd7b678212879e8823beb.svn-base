@@ -1,0 +1,21 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[RequireComponent(typeof(BoxCollider2D))]
+public class PowerUpPicked : MonoBehaviour
+{
+    [SerializeField]
+    private PowerUp powerup;
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag(TagContainer.PLAYER_TAG))
+        {
+            CustomEventSystem.PickedPowerUpAction(powerup);
+
+            powerup.Activator.DoEffet();
+            SoundManager.PlaySound(powerup.pickupSound, 2f);
+            Destroy(gameObject);
+        }
+    }
+}
